@@ -26,22 +26,22 @@ function setupEventListeners() {
     // Chat functionality
     sendButton.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+      if (e.key === 'Enter') sendMessage();
     });
-    
-    
-    document.getElementById('newChatButton').addEventListener('click', createNewSession);
+
+    document
+      .getElementById('newChatButton')
+      .addEventListener('click', createNewSession);
 
     // Suggested questions
-    document.querySelectorAll('.suggested-item').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const question = e.target.getAttribute('data-question');
-            chatInput.value = question;
-            sendMessage();
-        });
+    document.querySelectorAll('.suggested-item').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        const question = e.target.getAttribute('data-question');
+        chatInput.value = question;
+        sendMessage();
+      });
     });
 }
-
 
 // Chat Functions
 async function sendMessage() {
@@ -63,29 +63,28 @@ async function sendMessage() {
 
     try {
         const response = await fetch(`${API_URL}/query`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query: query,
-                session_id: currentSessionId
-            })
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: query,
+            session_id: currentSessionId,
+          }),
         });
 
         if (!response.ok) throw new Error('Query failed');
 
         const data = await response.json();
-        
+
         // Update session ID if new
         if (!currentSessionId) {
-            currentSessionId = data.session_id;
+          currentSessionId = data.session_id;
         }
 
         // Replace loading message with response
         loadingMessage.remove();
         addMessage(data.answer, 'assistant', data.sources);
-
     } catch (error) {
         // Replace loading message with error
         loadingMessage.remove();
@@ -124,11 +123,13 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     let html = `<div class="message-content">${displayContent}</div>`;
     
     if (sources && sources.length > 0) {
-        const sourceLinks = sources.map(s =>
+        const sourceLinks = sources
+          .map((s) =>
             s.link
-                ? `<a class="source-pill" href="${s.link}" target="_blank" rel="noopener noreferrer">${s.label}</a>`
-                : `<span class="source-pill">${s.label}</span>`
-        ).join('');
+              ? `<a class="source-pill" href="${s.link}" target="_blank" rel="noopener noreferrer">${s.label}</a>`
+              : `<span class="source-pill">${s.label}</span>`
+          )
+          .join('');
         html += `
             <details class="sources-collapsible">
                 <summary class="sources-header">Sources</summary>
@@ -151,8 +152,6 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Removed removeMessage function - no longer needed since we handle loading differently
-
 async function createNewSession() {
     const oldSessionId = currentSessionId;
     currentSessionId = null;
@@ -161,9 +160,9 @@ async function createNewSession() {
 
     try {
         const response = await fetch(`${API_URL}/session/new`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ old_session_id: oldSessionId })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ old_session_id: oldSessionId }),
         });
         if (response.ok) {
             const data = await response.json();
